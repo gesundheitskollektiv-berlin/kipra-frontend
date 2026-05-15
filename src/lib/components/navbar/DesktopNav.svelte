@@ -84,7 +84,7 @@
 					{/each}
 				{/if}
 
-				<li class="nav-item dropdown">
+				<li class="nav-item dropdown locale-nav-slot">
 					<button
 						class="btn-kipra btn-locale dropdown-toggle"
 						type="button"
@@ -159,8 +159,16 @@
 	}
 
 	.nav-cluster {
-		column-gap: 8px;
-		row-gap: 4px;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: flex-end;
+		column-gap: clamp(0.75rem, 1.4vw, 1.5rem);
+		row-gap: 0.5rem;
+	}
+
+	.locale-nav-slot {
+		margin-inline-start: clamp(2rem, 5vw, 4.5rem);
 	}
 
 	.navbar :global(.btn-kipra) {
