@@ -12,11 +12,18 @@
 	);
 	const sprechstunden = $derived(data?.sprechstunden ?? []);
 
+	function doctorDisplayName(d) {
+		const first = String(d.first_name ?? '').trim();
+		const ln = String(d.last_name ?? '').trim();
+		const last = ln && ln !== '-' ? ln : '';
+		return [first, last].filter(Boolean).join(' ');
+	}
+
 	function formatDoctors(doctors) {
 		if (!doctors?.length) return '';
 		return doctors
 			.map((d) => {
-				const name = `${d.first_name ?? ''} ${d.last_name ?? ''}`.trim();
+				const name = doctorDisplayName(d);
 				return `<a href="#mitarbeiterinnen">${name}</a>`;
 			})
 			.join(', ');

@@ -1,17 +1,40 @@
 import { building } from '$app/environment';
 import { env } from '$env/dynamic/public';
+import { env as privateEnv } from '$env/dynamic/private';
 import { getStrapiPublicUrl } from '$lib/helpers/strapiPublicUrl';
 
 const cache = new Map();
 
 const shouldUseCache = () => building && env.PUBLIC_PREVIEW_MODE !== 'true';
 
+/** @returns {Record<string, string>} */
+function getStrapiAuthHeaders() {
+	const token = (privateEnv.STRAPI_AUTH_TOKEN ?? '').trim();
+	if (!token) {
+		throw new Error(
+			'[getDataFromCMS] STRAPI_AUTH_TOKEN is missing or empty. Set it in .env (server-only) when Strapi REST is not public.'
+		);
+	}
+	return { Authorization: `Bearer ${token}` };
+}
+
 const fetchData = async (url, fetchFn = fetch) => {
 	if (shouldUseCache() && cache.has(url)) {
 		return cache.get(url);
 	}
 
-	const response = await fetchFn(url);
+	const headers = getStrapiAuthHeaders();
+	const response = await fetchFn(url, { headers });
+
+	if (!response.ok) {
+		const bodyText = await response.text();
+		console.error(
+			`[getDataFromCMS] Strapi ${response.status} ${response.statusText} ${url}:`,
+			bodyText.slice(0, 500)
+		);
+		throw new Error(`Strapi request failed: ${response.status} ${response.statusText}`);
+	}
+
 	const data = await response.json();
 
 	if (shouldUseCache()) {
