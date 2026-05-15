@@ -1,0 +1,15 @@
+{
+	"today": "Heute",
+	"noAnnouncements": "Keine aktuellen Mitteilungen.",
+	"back": "Zurück",
+	"chooseLanguage": "Sprache wählen",
+	"bookAppointment": "Termin buchen",
+	"languagesLabel": "Sprachen",
+	"imprint": "Impressum",
+	"privacyPolicyShort": "Datenschutz",
+	"materialsHeading": "Materialien",
+	"languages": {
+		"de": "Deutsch",
+		"en": "English"
+	}
+}

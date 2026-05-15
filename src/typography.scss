@@ -1,0 +1,100 @@
+@font-face {
+	font-family: 'CerebriSansPro';
+	src: url('$lib/assets/fonts/CerebriSansPro-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'CerebriSansPro';
+	src: url('$lib/assets/fonts/CerebriSansPro-Bold.woff2') format('woff2');
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'CerebriSansPro';
+	src: url('$lib/assets/fonts/CerebriSansPro-ExtraBold.woff2') format('woff2');
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
+h1,
+h2,
+h3,
+h4,
+strong {
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+	hyphens: auto;
+	padding-top: 0;
+	margin-top: 0;
+	font-weight: 600;
+}
+
+.font-xs {
+	font-size: 0.9375rem;
+	font-weight: 100;
+}
+
+#footer {
+	font-size: 1.125rem;
+}
+
+h1 {
+	font-size: 2.625rem;
+}
+
+h2 {
+	font-size: 1.875rem;
+}
+
+h3 {
+	font-size: 1.3125rem;
+}
+
+h4 {
+	font-size: 1.125rem;
+}
+
+ul {
+	list-style: none;
+}
+
+section ul {
+	list-style: disc outside;
+	list-style-image: none;
+	margin-left: 2em;
+	margin-top: 1em;
+}
+
+body section ul {
+	padding-bottom: 15px;
+	margin-left: 1em;
+	list-style-image: url('/images/Pfeil-Liste.svg');
+}
+
+@include media-breakpoint-up(lg) {
+	body {
+		font-size: 1.3125rem;
+	}
+
+	h1 {
+		font-size: 3.75rem;
+	}
+
+	h2 {
+		font-size: 2.625rem;
+	}
+
+	h3 {
+		font-size: 1.875rem;
+	}
+
+	h4 {
+		font-size: 1.3125rem;
+	}
+}
