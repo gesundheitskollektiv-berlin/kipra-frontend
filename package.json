@@ -4,7 +4,7 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"migrate:sprechzeiten": "node migration/migrate-sprechzeiten.js",
+		"migrate:content": "node migration/migrate-content.js",
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",

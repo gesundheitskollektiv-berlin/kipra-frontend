@@ -1,54 +1,75 @@
-# Alpra frontend → Strapi migrations
+# Kipra Kinderpraxis → Strapi migrations
 
-One-shot scripts that talk to the Strapi backend configured for this app.
+One-shot scripts that push **embedded Jekyll snapshots** from [`geko-kinderpraxis`](../../../geko-kinderpraxis) (`collections/_blocks`, `_pages`, `_page_settings`, `_employees`, `_notifications`) into Strapi (`kipra-*` types). Sources are hardened as JS under `migration/data/` — the migration **does not read markdown from disk at runtime**.
 
 ## Configuration
 
-The Strapi base URL is read from the parent [`kipra-frontend/.env`](../.env) (`PUBLIC_STRAPI_URL`). Override inline if needed:
+Env vars (**required**: `STRAPI_URL`; **recommended**: `STRAPI_AUTH_TOKEN`):
 
-```bash
-cd kipra-frontend/migration
-PUBLIC_STRAPI_URL=http://localhost:1337 STRAPI_TOKEN=<token> node migrate-sprechzeiten.js
-```
+| Variable | Purpose |
+|---------|---------|
+| `STRAPI_URL` | Strapi base URL; if unset, **`PUBLIC_STRAPI_URL`** from `kipra-frontend/.env` is used |
+| `STRAPI_AUTH_TOKEN` | Strapi API token (Bearer); omit only if endpoints are open |
+| `STRAPI_REQUEST_TIMEOUT_MS` | HTTP timeout per request (default `60000`); lower for faster failure on bad URLs |
 
-> `PUBLIC_STRAPI_URL` in `.env` may be quoted (`'http://...'`); the script strips surrounding quotes so axios gets a valid URL.
+Loading order (`dotenv`):
 
-A Strapi API token with write access on `kipra-page-landing` and `kipra-personnel` (create if missing doctors) is expected via `STRAPI_TOKEN` when your instance requires auth.
+1. **`kipra-frontend/.env`** (same file the Svelte/Vite app uses — usually defines `PUBLIC_STRAPI_URL`).
+2. **`kipra-frontend/.env.local`** (overrides 1.).
+3. `migration/.env`
+4. `migration/.env.local` (**overrides** the above)
 
-## Scripts
+If **`STRAPI_URL`** is unset but **`PUBLIC_STRAPI_URL`** is set (typical frontend layout), migrations copy it into **`STRAPI_URL`** (same URL normalisation as the app).
 
-### `migrate-sprechzeiten.js`
+Strapi tokens: **`STRAPI_AUTH_TOKEN`** is preferred; legacy **`STRAPI_TOKEN`** is also accepted if **`STRAPI_AUTH_TOKEN`** is empty.
 
-Replaces the `kipra-page-blocks.sprechstunden` component on `kipra-page-landing` with the legacy content from [`geko-allgemeinarzt/collections/_blocks/de/sprechzeiten.md`](../../../geko-allgemeinarzt/collections/_blocks/de/sprechzeiten.md), translated to English for the `en` locale.
+Example: [`migration/.env.example`](./.env.example).
 
-Install dependencies once (in `migration/`, where `axios` / `dotenv` live):
+Install dependencies once in **`migration/`** (axios, dotenv):
 
 ```bash
 cd kipra-frontend/migration && npm install
 ```
 
-From **`kipra-frontend/migration`** (after `npm install` there):
+## Script: `migrate:content`
+
+From **`kipra-frontend`** (after `migration/npm install`):
 
 ```bash
-node migrate-sprechzeiten.js
+npm run migrate:content
 ```
 
-Or from **`kipra-frontend`** (app root), without `cd` into `migration`:
+Equivalent:
 
 ```bash
-npm run migrate:sprechzeiten
+cd kipra-frontend/migration && STRAPI_URL=… STRAPI_AUTH_TOKEN=… node migrate-content.js
 ```
 
-That runs `node migration/migrate-sprechzeiten.js`; all script files stay under `migration/`.
+### Selective runs (`--only`)
 
-Use `STRAPI_TOKEN=...` (and optionally `PUBLIC_STRAPI_URL=...`) in the environment when your Strapi requires it.
+Run parts of the pipeline in isolation. Selected steps always run in the **default order** (meta → personnel → privacy → announcements → landing), no matter how you list them:
 
-The script:
+```bash
+node migrate-content.js --only=personnel
+node migrate-content.js --only news
+node migrate-content.js --only announcements,landing
+npm run migrate:content -- --only=privacy
+```
 
-1. Loads `PUBLIC_STRAPI_URL` from `../.env`.
-2. Ensures ten `kipra-personnel` rows from the legacy About page (five doctors referenced in sprechzeiten + five further staff): looks up by `last_name` (published, then draft); if missing, creates via `POST /api/kipra-personnels` with `first_name` / `position`. No image uploads.
-3. Resolves personnel `documentId`s for slot `doctors` relations (by last_name).
-4. For each locale (`de`, `en`): fetches `kipra-page-landing`, replaces or appends the sprechstunden block, PUTs the full content array back.
-5. Bootstraps the `en` entry by cloning the `de` content if `en` does not yet exist (other blocks stay German until separately translated).
+Aliases: **`personnel`** (`persons`, `team`), **`privacy`** (`datenschutz`), **`announcements`** (`news`), **`landing`** (`page`). Run `node migrate-content.js --help` for details.
 
-The intro paragraphs from the markdown ("Online-Termine werden 6 Wochen..." / "Für die Akutsprechstunde...") are intentionally dropped; the schema has no top-level description on the sprechstunden block.
+Writes in order (idempotent personnel / announcements where possible):
+
+1. **`kipra-meta`** (`de`, `en`) — company/contact fields (banner upload left for manual CMS if needed).
+2. **`kipra-personnels`** — **not** localized; upsert by `first_name` + `last_name`; **`position`** is **German only** (migration omits `locale` and never writes EN copy); images skipped. The `/en` layout still receives the same API rows (German roles) until you add UX translation if desired.
+3. **`kipra-page-datenschutzerklaerung`** — privacy markdown → blocks (`de`, `en`); publishes.
+4. **`kipra-announcements`** — merged “notifications” migration; deterministic DE title **`Diverses`** for lookups; **`is_urgent: false`** (`title` shown).
+5. **`kipra-page-landing`** — **replaces** full `content` dynamic zone (`de`, `en`) with welcome → announcements strip → transcript **Sprechstunden** (`sprechstundenData.js`) → termine → kontakt → über uns → empfehlungen → footer (**`purple`** for lilac legacy, **`green`** footer).
+
+API token permission must allow **find/create/update/publish** on those types (`meta`, Datenschutz, personnel, announcements, landing).
+
+### Sprechzeiten fidelity
+
+Timetables are transcribed into nested `kipra-page-blocks.sprechstunden` components (German includes **Telefonsprechzeiten** block; EN matches EN Jekyll shorthand). **`doctors`** on slots stays empty unless you extend the migration to relate personnel.
+
+After changing schemas, rebuild Strapi (`npm run build` / `develop`) and re-run **`strapi ts:generate-types`** in your toolchain if you keep `types/generated` in sync.

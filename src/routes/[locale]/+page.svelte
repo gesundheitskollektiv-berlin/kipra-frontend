@@ -38,6 +38,8 @@
 {#each landingBlocks as block, idx (`${block?.__component ?? 'unknown'}-${block?.id ?? idx}`)}
 	{#if block?.__component === 'kipra-page-blocks.welcome'}
 		<WelcomeBlock data={block} />
+	{:else if block?.__component === 'kipra-page-blocks.announcements'}
+		<AnnouncementsBlock data={block} announcements={regularAnnouncements} {locale} />
 	{:else if block?.__component === 'kipra-page-blocks.about'}
 		<AboutBlock data={block} {locale} {personnel} {materials} />
 	{:else if block?.__component === 'kipra-page-blocks.services'}
