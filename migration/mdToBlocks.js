@@ -1,6 +1,8 @@
 /**
  * Markdown → Strapi Blocks (subset aligned with kipra-frontend `richTextResolver`).
  * Supports: ###–###### headings, paragraphs, unordered lists (- / *), **bold**, [text](url).
+ *
+ * Strapi list-item `children` must be inline nodes only (text / link), not nested paragraphs.
  */
 
 /** @param {string} segment */
@@ -8,15 +10,27 @@ export function inlineToChildren(segment) {
 	if (!segment) return [{ type: 'text', text: '' }];
 	const children = [];
 
-	const regex = /(\*\*[^*]+\*\*)|(\[[^\]]+\]\([^)]+\))|([^*\[]+)/g;
+	// Order: bold-wrapped link, plain link, bold, then remainder (avoids ** swallowing [ … ]( … ) **).
+	const regex =
+		/(\*\*\[[^\]]+\]\([^)]+\)\*\*)|(\[[^\]]+\]\([^)]+\))|(\*\*[^*]+\*\*)|([^[*]+)/g;
 	let m;
 	while ((m = regex.exec(segment))) {
-		const boldish = m[1];
+		const boldLink = m[1];
 		const linkish = m[2];
-		const plain = m[3];
-		if (boldish) {
-			const inner = boldish.slice(2, -2);
-			children.push({ type: 'text', text: inner, bold: true });
+		const boldish = m[3];
+		const plain = m[4];
+		if (boldLink) {
+			const inner = boldLink.slice(2, -2);
+			const lm = inner.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+			if (lm) {
+				children.push({
+					type: 'link',
+					url: lm[2].trim(),
+					children: [{ type: 'text', text: lm[1], bold: true }]
+				});
+			} else {
+				children.push({ type: 'text', text: boldLink });
+			}
 		} else if (linkish) {
 			const lm = linkish.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
 			if (lm) {
@@ -26,6 +40,9 @@ export function inlineToChildren(segment) {
 					children: [{ type: 'text', text: lm[1] }]
 				});
 			}
+		} else if (boldish) {
+			const inner = boldish.slice(2, -2);
+			children.push({ type: 'text', text: inner, bold: true });
 		} else if (plain) {
 			children.push({ type: 'text', text: plain });
 		}
@@ -37,6 +54,11 @@ export function inlineToChildren(segment) {
 /** @param {string} line */
 function paragraphBlock(line) {
 	return { type: 'paragraph', children: inlineToChildren(line.trim()) };
+}
+
+/** @param {string} line */
+function listItemChildren(line) {
+	return inlineToChildren(line.trim());
 }
 
 /** @param {string} md */
@@ -74,7 +96,7 @@ export function simpleMarkdownToBlocks(md) {
 				if (!m) break;
 				items.push({
 					type: 'list-item',
-					children: [paragraphBlock(m[1])]
+					children: listItemChildren(m[1])
 				});
 				i += 1;
 			}

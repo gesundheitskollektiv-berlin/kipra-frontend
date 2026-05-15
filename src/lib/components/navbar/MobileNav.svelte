@@ -4,8 +4,6 @@
 	import { slugify } from '$lib/helpers/landingBlocks';
 	import { t, SUPPORTED_LOCALES } from '$lib/helpers/translation';
 
-	const APPOINTMENT_URL =
-		'https://webtermin.medatixx.de/#/8d8ca1e9-2ade-470a-86e7-ffd670b41b03';
 	const GEKO_REFERENCE_URL = 'https://geko-berlin.de/';
 
 	let { landingBlocks = [], locale = 'de' } = $props();
@@ -71,8 +69,8 @@
 </script>
 
 <header class="mobile-bar bg-kipra-yellow d-xl-none">
-	<a class="brand" href="/{locale}" aria-label="Stadtteilpraxis Startseite">
-		<img src="/images/Logo-Praxis.svg" alt="Logo Stadtteilpraxis" class="brand-logo" />
+	<a class="brand" href="/{locale}" aria-label="Berghafenpraxis Startseite">
+		<img src="/images/Logo_Praxis1.svg" alt="Berghafenpraxis" class="brand-logo" />
 	</a>
 	<button
 		type="button"
@@ -98,9 +96,9 @@
 				class="brand"
 				href="/{locale}"
 				onclick={close}
-				aria-label="Stadtteilpraxis Startseite"
+				aria-label="Berghafenpraxis Startseite"
 			>
-				<img src="/images/Logo-Praxis.svg" alt="Logo Stadtteilpraxis" class="brand-logo" />
+				<img src="/images/Logo_Praxis1.svg" alt="Berghafenpraxis" class="brand-logo" />
 			</a>
 			<button
 				class="burger open"
@@ -138,18 +136,6 @@
 						</li>
 					{/each}
 				{/if}
-
-				<li>
-					<a
-						href={APPOINTMENT_URL}
-						target="_blank"
-						rel="noopener noreferrer"
-						class="btn-kipra btn-appointment"
-						onclick={close}
-					>
-						{t(locale).bookAppointment}
-					</a>
-				</li>
 
 				<li class="locale-group" aria-label={t(locale).languagesLabel}>
 					<div class="locale-heading">{t(locale).languagesLabel}</div>
@@ -276,25 +262,13 @@
 		display: inline-block;
 	}
 
-	.overlay-list :global(li > .btn-kipra:not(.btn-appointment):not(.locale-pill):hover) {
+	.overlay-list :global(li > .btn-kipra:not(.locale-pill):hover) {
 		background-color: var(--bs-kipra-yellow-light) !important;
 	}
 
 	.overlay-list :global(li > .btn-kipra.active),
 	.overlay-list :global(li > .btn-kipra.active:hover) {
 		background-color: var(--bs-kipra-yellow) !important;
-	}
-
-	.btn-appointment {
-		background-color: var(--bs-kipra-purple);
-		color: #000;
-	}
-
-	.btn-appointment:hover,
-	.btn-appointment:focus {
-		background-color: var(--bs-kipra-purple);
-		color: #000;
-		filter: brightness(0.95);
 	}
 
 	.locale-group {

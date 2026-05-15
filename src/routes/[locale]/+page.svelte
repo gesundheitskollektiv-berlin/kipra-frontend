@@ -26,8 +26,13 @@
 </script>
 
 {#if meta?.page_banner}
-	<div class="w-100">
-		<StrapiImage asset={meta.page_banner} alt="Banner" class="img-fluid w-100" />
+	<div class="banner-wrapper w-100">
+		<StrapiImage
+			asset={meta.page_banner}
+			alt={meta.page_banner.alternativeText || 'Banner'}
+			class="w-100 landing-banner"
+			style="display: block;"
+		/>
 	</div>
 {/if}
 
@@ -54,3 +59,24 @@
 		<TermineBlock data={block} />
 	{/if}
 {/each}
+
+<style>
+	.banner-wrapper {
+		position: relative;
+		overflow: visible;
+	}
+
+	:global(.landing-banner) {
+		aspect-ratio: 16 / 9;
+		min-height: 260px;
+		max-height: 460px;
+		object-fit: cover;
+		object-position: center;
+	}
+
+	@media (max-width: 767.98px) {
+		:global(.landing-banner) {
+			aspect-ratio: 4 / 3;
+		}
+	}
+</style>

@@ -1,5 +1,6 @@
 <script>
 	import { slugify } from '$lib/helpers/landingBlocks';
+	import { t } from '$lib/helpers/translation';
 
 	let { data = {}, meta = {}, locale = 'de' } = $props();
 
@@ -8,18 +9,38 @@
 	);
 	const sectionId = $derived(data?.navbar_link_title ? slugify(data.navbar_link_title) : 'footer');
 	const baseUrl = $derived(`/${locale}`);
+	const i18n = $derived(t(locale));
+
+	const partners = [
+		{
+			href: 'https://sea-watch.org/',
+			img: '/images/sea-watch_logo.png',
+			alt: 'Sea-Watch'
+		},
+		{
+			href: 'https://www.bizim-kiez.de/',
+			img: '/images/cropped-bizim-kiez-logo.png',
+			alt: 'Bizim Kiez'
+		},
+		{
+			href: 'https://partner.chiapas.eu',
+			img: '/images/partner_suedmexikos.png',
+			alt: 'Chiapas partner'
+		}
+	];
 </script>
 
+<!-- Mirrors geko-kinderpraxis _includes/footer.html -->
 <footer id={sectionId} class={`${backgroundClass} py-5`}>
 	<div class="container fs-5" id="footer">
 		<div class="row justify-content-center">
 			<div class="col-lg-10 col-md-11 col-sm-11">
 				<div class="row">
-					<div class="col-12">
+					<div class="col-12 text-md-start text-center">
 						<a href={baseUrl}>
-							<figure class="mb-0 py-3 text-start">
+							<figure class="mb-0 py-3">
 								<img
-									src="/images/Logo-Praxis-Footer.svg"
+									src="/images/Logo_Praxis1_Footer.svg"
 									alt="Logo"
 									class="footer-logo"
 								/>
@@ -29,8 +50,10 @@
 				</div>
 
 				<div class="row mt-4">
-					<div class="col-md-4 contact-data">
-						<h5 class="h5">Kontakt</h5>
+					<!-- Kontakt (wie contact.html + page_settings) -->
+					<div class="col-md-6 text-md-start text-center mb-4 mb-md-0">
+						<h4 class="h4">{i18n.contact}</h4>
+
 						{#if meta?.street}
 							<p>
 								<span class="fa fa-home" aria-hidden="true"></span>
@@ -54,30 +77,28 @@
 
 						{#if meta?.email}
 							<p>
-								<span class="fa fa-envelope" aria-hidden="true"></span>
+								<span class="fa fa-at" aria-hidden="true"></span>
 								&nbsp;<a href="mailto:{meta.email}" class="text-decoration-none">{meta.email}</a>
 							</p>
 						{/if}
 					</div>
 
-					<div class="col-md-4">
-						<h5 class="h5">Impressum</h5>
-						<p><em>Berufsausübungsgemeinschaft (BAG)</em></p>
-						<p><strong>Stadtteil-Praxis Neukölln</strong></p>
+					<!-- Impressum (wie footer.html rechte Spalte) -->
+					<div class="col-md-6 text-md-start text-center">
+						<h4 class="h4">{i18n.imprint}</h4>
 						<p>
-							<strong>Johanna Henatsch</strong><br />
-							<em>Fachärztin für Innere Medizin</em>
+							Dr. med. Lothar Müller<br />
+							- Facharzt für Kinder- und Jugendmedizin<br />
+							- Berufsbezeichnung erworben in Deutschland<br />
 						</p>
 						<p>
-							<strong>Kirsten Schubert</strong><br />
-							<em>Fachärztin für Allgemeinmedizin</em><br />
-							<em>Hausärztliche Versorgung</em>
+							Dr. med. Eva Feuerhahn (angestellte Fachärztin)<br />
+							Dr. med. Laura Schlemmer (angestellte Fachärztin)<br />
+							Dr. med. Lena Wirth (angestellte Fachärztin)<br />
+							Dr. med. Jonathan Zepp (angestellter Facharzt)<br />
 						</p>
-					</div>
-
-					<div class="col-md-4">
-						<h5 class="h5">Zuständige Aufsichtsbehörde</h5>
 						<p>
+							<strong>Zuständige Aufsichtsbehörde</strong><br />
 							Landesamt für Gesundheit und Soziales (LAGeSo)<br />
 							Postanschrift: Postfach 31 09 29, 10639 Berlin<br />
 							Telefon: (030) 90229-0
@@ -88,11 +109,21 @@
 							10969 Berlin
 						</p>
 						<p>
-							<a href="{baseUrl}/datenschutz" class="text-decoration-underline fw-lighter"
-								>Datenschutz</a
-							>
+							<a href="{baseUrl}/datenschutz" class="footer-link text-decoration-underline fw-lighter">
+								{i18n.privacyPolicyShort}
+							</a>
 						</p>
 					</div>
+				</div>
+
+				<div class="row mt-4 align-items-center">
+					{#each partners as { href, img, alt } (href)}
+						<div class="col-12 col-md-4 text-center py-2">
+							<a {href} rel="noopener noreferrer" target="_blank">
+								<img src={img} {alt} class="footer-partner-logo img-fluid" />
+							</a>
+						</div>
+					{/each}
 				</div>
 			</div>
 		</div>
@@ -106,6 +137,13 @@
 		max-width: 100%;
 	}
 
+	.footer-partner-logo {
+		max-height: 56px;
+		width: auto;
+		max-width: 100%;
+		object-fit: contain;
+	}
+
 	@media (max-width: 575.98px) {
 		.footer-logo {
 			height: auto;
@@ -115,7 +153,7 @@
 	}
 
 	footer :global(p),
-	footer :global(h5),
+	footer :global(h4),
 	footer :global(a) {
 		overflow-wrap: break-word;
 		word-break: break-word;

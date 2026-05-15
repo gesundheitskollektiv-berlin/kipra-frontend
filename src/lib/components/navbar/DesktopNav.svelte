@@ -4,8 +4,6 @@
 	import { slugify } from '$lib/helpers/landingBlocks';
 	import { t, SUPPORTED_LOCALES } from '$lib/helpers/translation';
 
-	const APPOINTMENT_URL =
-		'https://webtermin.medatixx.de/#/8d8ca1e9-2ade-470a-86e7-ffd670b41b03';
 	const GEKO_REFERENCE_URL = 'https://geko-berlin.de/';
 
 	let { landingBlocks = [], locale = 'de' } = $props();
@@ -56,8 +54,8 @@
 	<div class="container">
 		<a class="navbar-brand d-flex align-items-center" href="/{locale}">
 			<img
-				src="/images/Logo-Praxis.svg"
-				alt="Logo Stadtteilpraxis"
+				src="/images/Logo_Praxis1.svg"
+				alt="Berghafenpraxis"
 				class="navbar-logo"
 				class:navbar-logo-small={isScrolled}
 			/>
@@ -85,17 +83,6 @@
 						</li>
 					{/each}
 				{/if}
-
-				<li class="nav-item nav-divider">
-					<a
-						class="btn-kipra btn-appointment"
-						href={APPOINTMENT_URL}
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						{t(locale).bookAppointment}
-					</a>
-				</li>
 
 				<li class="nav-item dropdown">
 					<button
@@ -176,10 +163,6 @@
 		row-gap: 4px;
 	}
 
-	.nav-divider {
-		margin-left: 8px;
-	}
-
 	.navbar :global(.btn-kipra) {
 		padding: 4px 12px;
 		gap: 10px;
@@ -189,25 +172,13 @@
 		white-space: nowrap;
 	}
 
-	.navbar :global(.navbar-nav a.btn-kipra:not(.btn-appointment):not(.btn-locale):hover) {
+	.navbar :global(.navbar-nav a.btn-kipra:not(.btn-locale):hover) {
 		background-color: var(--bs-kipra-yellow-light) !important;
 	}
 
 	.navbar :global(.navbar-nav a.btn-kipra.active),
 	.navbar :global(.navbar-nav a.btn-kipra.active:hover) {
 		background-color: var(--bs-kipra-yellow) !important;
-	}
-
-	.btn-appointment {
-		background-color: var(--bs-kipra-purple);
-		color: #000;
-	}
-
-	.btn-appointment:hover,
-	.btn-appointment:focus {
-		background-color: var(--bs-kipra-purple);
-		color: #000;
-		filter: brightness(0.95);
 	}
 
 	.btn-locale {
