@@ -42,7 +42,7 @@
 								<img
 									src="/images/Logo_Praxis1_Footer.svg"
 									alt="Logo"
-									class="footer-logo"
+									class="img-fluid"
 								/>
 							</figure>
 						</a>
@@ -120,7 +120,7 @@
 					{#each partners as { href, img, alt } (href)}
 						<div class="col-12 col-md-4 text-center py-2">
 							<a {href} rel="noopener noreferrer" target="_blank">
-								<img src={img} {alt} class="footer-partner-logo img-fluid" />
+								<img src={img} {alt} class="img-fluid" />
 							</a>
 						</div>
 					{/each}
@@ -131,27 +131,6 @@
 </footer>
 
 <style>
-	.footer-logo {
-		height: 80px;
-		width: auto;
-		max-width: 100%;
-	}
-
-	.footer-partner-logo {
-		max-height: 56px;
-		width: auto;
-		max-width: 100%;
-		object-fit: contain;
-	}
-
-	@media (max-width: 575.98px) {
-		.footer-logo {
-			height: auto;
-			width: 100%;
-			max-width: 320px;
-		}
-	}
-
 	footer :global(p),
 	footer :global(h4),
 	footer :global(a) {
