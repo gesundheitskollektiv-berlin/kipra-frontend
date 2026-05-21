@@ -52,7 +52,7 @@
 	{:else if block?.__component === 'kipra-page-blocks.sprechstunden'}
 		<SprechstundenBlock data={block} {locale} />
 	{:else if block?.__component === 'kipra-page-blocks.contact'}
-		<ContactBlock data={block} {meta} />
+		<ContactBlock data={block} {meta} {locale} />
 	{:else if block?.__component === 'kipra-page-blocks.footer'}
 		<FooterBlock data={block} {meta} {locale} />
 	{:else if block?.__component === 'kipra-page-blocks.termine'}

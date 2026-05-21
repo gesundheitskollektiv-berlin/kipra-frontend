@@ -11,5 +11,7 @@
 	"languages": {
 		"de": "Deutsch",
 		"en": "English"
-	}
+	},
+	"previous": "Vorheriges Bild",
+	"next": "Nächstes Bild"
 }

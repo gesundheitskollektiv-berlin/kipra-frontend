@@ -1,10 +1,11 @@
 <script>
+	import { onMount } from 'svelte';
 	import { resolveRichText } from '$lib/helpers/richTextResolver';
 	import { slugify } from '$lib/helpers/landingBlocks';
+	import StrapiImage from '$lib/components/StrapiImage.svelte';
+	import { t } from '$lib/helpers/translation';
 
-	let { data = {}, meta = {} } = $props();
-
-	let showGoogleMap = $state(false);
+	let { data = {}, meta = {}, locale = 'de' } = $props();
 
 	const backgroundClass = $derived(
 		data?.background_color ? `bg-kipra-${data.background_color}` : 'bg-kipra-white'
@@ -16,7 +17,78 @@
 		encodeURIComponent(`${meta?.street ?? ''}, ${meta?.postal ?? ''} ${meta?.city ?? ''}`.trim())
 	);
 
-	const toggleMap = () => (showGoogleMap = !showGoogleMap);
+	/** @returns {unknown[]} */
+	function normalizeMediaList(raw) {
+		if (Array.isArray(raw)) return raw;
+		if (raw && typeof raw === 'object' && Array.isArray(raw.data)) return raw.data;
+		return [];
+	}
+
+	const slides = $derived.by(() => {
+		const base = [
+			{
+				kind: 'iframe',
+				src: `https://maps.google.com/maps?width=100%25&height=600&hl=${locale}&q=${mapQuery}&t=&z=16&ie=UTF8&iwloc=B&output=embed`
+			}
+		];
+		const imgs = normalizeMediaList(data?.images);
+		for (const asset of imgs) {
+			if (!asset) continue;
+			base.push({
+				kind: 'strapi',
+				asset,
+				alt: asset?.alternativeText || data?.title || ' '
+			});
+		}
+		return base;
+	});
+
+	let activeSlide = $state(0);
+
+	/** @type {ReturnType<typeof setInterval> | undefined} */
+	let intervalId;
+
+	function next() {
+		const len = slides.length;
+		if (len === 0) return;
+		activeSlide = (activeSlide + 1) % len;
+	}
+
+	function prev() {
+		const len = slides.length;
+		if (len === 0) return;
+		activeSlide = (activeSlide - 1 + len) % len;
+	}
+
+	function restart() {
+		if (intervalId) clearInterval(intervalId);
+		intervalId = setInterval(next, 5000);
+	}
+
+	function pause() {
+		if (intervalId) {
+			clearInterval(intervalId);
+			intervalId = undefined;
+		}
+	}
+
+	/** @param {number} i */
+	function go(i) {
+		activeSlide = i;
+		restart();
+	}
+
+	$effect(() => {
+		const len = slides.length;
+		if (len > 0 && activeSlide >= len) {
+			activeSlide = len - 1;
+		}
+	});
+
+	onMount(() => {
+		restart();
+		return () => pause();
+	});
 </script>
 
 <section id={sectionId} class={`${backgroundClass} py-0`}>
@@ -62,16 +134,74 @@
 					</div>
 				</div>
 
-				<div id="map-simple" class={`mb-4 ${showGoogleMap ? 'd-none' : ''}`}>
-					<div class="ratio ratio-16x9 bg-light">
-						<iframe
-							src={`https://maps.google.com/maps?width=100%25&height=600&hl=de&q=${mapQuery}&t=&z=14&ie=UTF8&iwloc=B&output=embed`}
-							allowfullscreen
-							loading="lazy"
-							title="Google Maps"
-						></iframe>
+				{#if slides.length > 0}
+					<div
+						class="contact-carousel carousel slide carousel-fade mb-4"
+						onmouseenter={pause}
+						onmouseleave={restart}
+						onfocusin={pause}
+						onfocusout={restart}
+						role="region"
+						aria-roledescription="carousel"
+					>
+						<div class="carousel-indicators">
+							{#each slides as _, i}
+								<button
+									type="button"
+									class:active={i === activeSlide}
+									aria-current={i === activeSlide ? 'true' : undefined}
+									aria-label={`${i + 1}`}
+									onclick={() => go(i)}
+								></button>
+							{/each}
+						</div>
+
+						<div class="carousel-inner">
+							{#each slides as slide, i}
+								<div class="carousel-item" class:active={i === activeSlide}>
+									{#if slide.kind === 'iframe'}
+										<iframe
+											src={slide.src}
+											class="contact-carousel__media"
+											title="Google Maps"
+											allowfullscreen
+											loading="lazy"
+										></iframe>
+									{:else if slide.kind === 'strapi'}
+										<StrapiImage
+											asset={slide.asset}
+											alt={slide.alt}
+											class="contact-carousel__media"
+										/>
+									{/if}
+								</div>
+							{/each}
+						</div>
+
+						<button
+							class="carousel-control-prev"
+							type="button"
+							onclick={() => {
+								prev();
+								restart();
+							}}
+						>
+							<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+							<span class="visually-hidden">{t(locale).previous}</span>
+						</button>
+						<button
+							class="carousel-control-next"
+							type="button"
+							onclick={() => {
+								next();
+								restart();
+							}}
+						>
+							<span class="carousel-control-next-icon" aria-hidden="true"></span>
+							<span class="visually-hidden">{t(locale).next}</span>
+						</button>
 					</div>
-				</div>
+				{/if}
 
 				{#if data?.content}
 					<div class="content-container mb-4">
@@ -96,4 +226,72 @@
 		line-height: 2;
 	}
 
+	.contact-carousel {
+		position: relative;
+		aspect-ratio: 16 / 9;
+		border-radius: 0.5rem;
+		overflow: hidden;
+		background: #000;
+	}
+
+	.contact-carousel .carousel-inner {
+		height: 100%;
+	}
+
+	.contact-carousel .carousel-item {
+		height: 100%;
+	}
+
+	.contact-carousel :global(.contact-carousel__media) {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		border: 0;
+		display: block;
+	}
+
+	.contact-carousel .carousel-control-prev,
+	.contact-carousel .carousel-control-next {
+		width: auto;
+		padding: 0 0.65rem;
+		opacity: 1;
+		filter: none;
+		z-index: 4;
+		background-image: none;
+	}
+
+	.contact-carousel .carousel-control-prev {
+		left: 0.5rem;
+	}
+
+	.contact-carousel .carousel-control-next {
+		right: 0.5rem;
+	}
+
+	.contact-carousel .carousel-control-prev:hover,
+	.contact-carousel .carousel-control-next:hover,
+	.contact-carousel .carousel-control-prev:focus,
+	.contact-carousel .carousel-control-next:focus {
+		opacity: 1;
+	}
+
+	.contact-carousel .carousel-control-prev-icon,
+	.contact-carousel .carousel-control-next-icon {
+		width: 2.75rem;
+		height: 2.75rem;
+		border-radius: 50%;
+		background-color: rgba(46, 46, 46, 0.88);
+		background-size: 45% 45%;
+		background-position: center;
+		background-repeat: no-repeat;
+		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+		transition: background-color 0.15s ease;
+	}
+
+	.contact-carousel .carousel-control-prev:hover .carousel-control-prev-icon,
+	.contact-carousel .carousel-control-next:hover .carousel-control-next-icon,
+	.contact-carousel .carousel-control-prev:focus .carousel-control-prev-icon,
+	.contact-carousel .carousel-control-next:focus .carousel-control-next-icon {
+		background-color: rgba(62, 62, 65, 0.95);
+	}
 </style>
