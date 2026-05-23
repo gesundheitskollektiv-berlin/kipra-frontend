@@ -72,24 +72,8 @@
 	}
 
 	.material-card__body .material-download {
+		align-self: flex-start;
 		margin-bottom: 1.5rem;
-	}
-
-	@media (min-width: 768px) {
-		.material-card__body {
-			flex-direction: row;
-			align-items: center;
-			gap: 1.5rem;
-		}
-
-		.material-card__body .material-download {
-			flex-shrink: 0;
-			margin-bottom: 0;
-		}
-
-		.material-card__body .material-card__text {
-			flex: 1;
-		}
 	}
 
 	.material-download {
