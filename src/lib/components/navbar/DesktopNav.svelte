@@ -172,11 +172,11 @@
 	}
 
 	.navbar :global(.btn-kipra) {
-		padding: 4px 12px;
+		padding: 8px 18px;
 		gap: 10px;
 		border-radius: 24px;
-		font-size: 1rem;
-		line-height: 1.4;
+		font-size: 1.1rem;
+		line-height: 1.35;
 		white-space: nowrap;
 	}
 
