@@ -93,7 +93,7 @@
 						</p>
 						<p>
 							Dr. med. Eva Feuerhahn (angestellte Fachärztin)<br />
-							Dr. med. Laura Schlemmer (angestellte Fachärztin)<br />
+							Dr. med. Eva Senger (angestellte Fachärztin)<br />
 							Dr. med. Lena Wirth (angestellte Fachärztin)<br />
 							Dr. med. Jonathan Zepp (angestellter Facharzt)<br />
 						</p>
